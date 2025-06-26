@@ -1,12 +1,14 @@
-name: Update and Build Flake
+name: CI
 
 on:
-  workflow_dispatch:
-  schedule:
-    - cron: '0 2 * * *'
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
 
 jobs:
-  update-and-build:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -14,6 +16,10 @@ jobs:
 
       - name: Set up Nix
         uses: cachix/install-nix-action@v27
+
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v27
+      - run: nix flake check
 
       - name: Update flake.lock
         run: nix flake update
