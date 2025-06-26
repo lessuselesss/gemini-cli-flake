@@ -1,9 +1,11 @@
-name: Daily Dependency Update
+name: Dependency Update
 
 on:
+  push:
+    branches:
+      - master   # or 'main', or any branch(es) you want to trigger on
   schedule:
-    # Runs every day at 2:00 UTC
-    - cron: '0 2 * * *'
+    - cron: '0 2 * * *'   # still runs daily at 02:00 UTC
 
 jobs:
   update:
@@ -28,5 +30,5 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add .
-          git commit -m "chore: daily dependency update" || exit 0
+          git commit -m "chore: update dependencies on push" || exit 0
           git push
