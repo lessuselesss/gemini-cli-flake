@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-+echo "Updating @google-ai/gemini-cli to latest..."
-+npm update @google-ai/gemini-cli
+echo "Updating @google-ai/gemini-cli to latest..."
+npm update @google-ai/gemini-cli
 
 
 
