@@ -1,36 +1,59 @@
 {
+  description = "Gemini CLI as a Nix flake package";
+
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    flake-parts.url = "github:hercules-ci/flake-parts";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = inputs@{ flake-parts, ... }: flake-parts.lib.mkFlake { inherit inputs; } ({ lib, ... }: {
+  outputs = { self, nixpkgs, flake-utils }:
+    flake-utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = import nixpkgs { inherit system; };
 
-    imports = [ flake-parts.flakeModules.easyOverlay ];
-    systems = lib.systems.flakeExposed;
+        # Set your package version and npm hash here
+        version = "0.1.0";
+        npmDepsHash = "sha256-0000000000000000000000000000000000000000000="; # <- Update this!
 
-    perSystem = { config, pkgs, ... }: {
-      overlayAttrs = {
-        gemini-cli = config.packages.gemini-cli;
-      };
-
-      packages = {
-        gemini-cli = pkgs.buildNpmPackage {
-          pname = "gemini";
-          version = "0.0.1";
-          src = pkgs.fetchFromGitHub {
-            owner = "google-gemini";
-            repo = "gemini-cli";
-            rev = "0915bf7d677504c28b079693a0fe1c853adc456e";
-            hash = "sha256-s1K3bNEDdqy2iz3bk/3RdaCoGDenfc6knARzO/q3YcE=";
-          };
-          npmDepsHash = "sha256-2zyMrVykKtN+1ePQko9MVhm79p7Xbo9q0+r/P22buQA=";
-          npmPackFlags = [ "--ignore-scripts" ];
-          dontCheckForBrokenSymlinks = true;
+        # If your CLI is defined in node_modules/.bin/gemini or similar, you can add more here
+        executables = {
+          "gemini" = "bin/gemini.js"; # adjust the path if needed
         };
-      };
+      in
+      {
+        devShells.default = pkgs.mkShell {
+          buildInputs = with pkgs; [
+            nodejs
+          ];
+        };
 
-      defaultPackage = config.packages.gemini-cli;
-    };
-  });
+        packages = {
+          default = self.packages.${system}.gemini-cli;
+
+          "gemini-cli" = pkgs.buildNpmPackage {
+            pname = "gemini";
+            version = version;
+            src = ./.;
+            npmDepsHash = npmDepsHash;
+
+            installPhase = ''
+              runHook preInstall
+
+              mkdir -p $out/bin $out/share
+              cp -r node_modules $out/share/
+
+              # Symlink the CLI
+              ln -s $out/share/node_modules/${executables.gemini} $out/bin/gemini
+
+              runHook postInstall
+            '';
+          };
+        };
+
+        apps.default = flake-utils.lib.mkApp {
+          drv = self.packages.${system}.gemini-cli;
+          name = "gemini";
+        };
+      }
+    );
 }
