@@ -1,6 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
+# Jump to of update-gemini.sh
+# cd src  # or wherever your package.json lives
+
 echo "Updating @google-ai/gemini-cli to latest..."
 npm update @google-ai/gemini-cli
 
