@@ -1,0 +1,33 @@
+name: Update and Build Flake
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *'
+
+jobs:
+  update-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Nix
+        uses: cachix/install-nix-action@v27
+
+      - name: Update flake.lock
+        run: nix flake update
+
+      - name: Build flake
+        run: nix build
+
+      - name: Show outputs
+        run: nix flake show
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add flake.lock
+          git commit -m "chore: update flake.lock dependencies" || exit 0
+          git push
