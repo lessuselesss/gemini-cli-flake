@@ -3,9 +3,9 @@ name: Dependency Update
 on:
   push:
     branches:
-      - master   # or 'main', or any branch(es) you want to trigger on
+      - master # or 'main', or any branch(es) you want to trigger on
   schedule:
-    - cron: '0 2 * * *'   # still runs daily at 02:00 UTC
+    - cron: '0 2 * * *' # runs daily at 02:00 UTC
 
 jobs:
   update:
@@ -18,6 +18,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: .
 
       - name: Set up Nix
         uses: cachix/install-nix-action@v23
