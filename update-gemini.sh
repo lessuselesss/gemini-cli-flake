@@ -1,8 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "Updating @anthropic-ai/claude-code to latest..."
-npm update @anthropic-ai/claude-code
++echo "Updating @google-ai/gemini-cli to latest..."
++npm update @google-ai/gemini-cli
+
+
 
 echo "Running npm install..."
 npm install
